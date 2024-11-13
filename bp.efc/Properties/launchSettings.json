@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "bp.efc": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
