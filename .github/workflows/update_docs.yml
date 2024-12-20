@@ -1,0 +1,63 @@
+name: Update Documentation
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update-docs:
+    if: github.event.pull_request.merged == true # Only run if PR was merged
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Check out the code from the product repository
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    # Step 2: Set up .NET environment
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0'
+
+    # Step 3: Install DocFX as a global tool
+    - name: Install DocFX
+      run: dotnet tool install -g docfx
+
+    # Step 4: Add DocFX to PATH
+    - name: Add DocFX to PATH
+      run: echo "::add-path::$(dotnet tool list -g | grep docfx | awk '{print $3}')"
+
+    # Step 5: Build the project to generate XML documentation
+    - name: Build Project
+      run: dotnet build --configuration Release
+
+    # Step 6: Generate DocFX Metadata (XML to Markdown conversion)
+    - name: Generate Documentation with DocFX
+      run: |
+        mkdir docs-output # Output directory
+        docfx init --quiet # Initialize DocFX project if not already done
+        docfx metadata # Generate metadata from XML docs
+        docfx build -o docs-output # Build documentation into Markdown
+
+    # Step 7: Clone the documentation site repository
+    - name: Checkout Documentation Site
+      uses: actions/checkout@v3
+      with:
+        repository: your-org/documentation-site
+        token: ${{ secrets.GITHUB_TOKEN }}
+        path: docs-site
+
+    # Step 8: Copy the generated Markdown files to the docs repository
+    - name: Copy Documentation
+      run: |
+        cp -r docs-output/* docs-site/path-to-docs/
+
+    # Step 9: Commit and push changes to the documentation site
+    - name: Commit and Push Changes
+      run: |
+        cd docs-site
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git add .
+        git commit -m "Update docs from PR #${{ github.event.pull_request.number }}"
+        git push
