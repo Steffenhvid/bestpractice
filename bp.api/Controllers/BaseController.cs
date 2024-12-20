@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using bp.domain.Interfaces;
+﻿using bp.domain.Interfaces;
 using bp.domain.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace bp.api.Controllers
 {
@@ -15,6 +15,11 @@ namespace bp.api.Controllers
     {
         private readonly ILogger<BaseController<T>> logger = logger;
 
+        /// <summary>
+        /// Get a single entity by its id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id:int}")]
         public async Task<ActionResult<T>> Get(int id)
         {
